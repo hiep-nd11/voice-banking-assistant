@@ -1,0 +1,10 @@
+services:
+  fe:
+    image: vtb-fe:local
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./public/app-config.json:/usr/share/nginx/html/app-config.json:ro
+    restart: unless-stopped

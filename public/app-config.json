@@ -1,0 +1,291 @@
+{
+  "app": {
+    "title": "VTB Voice Banking — Demo",
+    "locale": "vi-VN",
+    "currencySymbol": "₫",
+    "referencePrefix": "DEMO-",
+    "referenceDigits": 5
+  },
+  "user": {
+    "id": "demo-user",
+    "name": "test",
+    "bank": "VietinBank",
+    "account": "106800003456",
+    "balance": 19022003
+  },
+  "banks": [
+    {
+      "name": "VietinBank",
+      "bin": "970415"
+    },
+    {
+      "name": "Vietcombank",
+      "bin": "970436"
+    },
+    {
+      "name": "MB Bank",
+      "bin": "970422"
+    },
+    {
+      "name": "Techcombank",
+      "bin": "970407"
+    },
+    {
+      "name": "BIDV",
+      "bin": "970418"
+    },
+    {
+      "name": "ACB",
+      "bin": "970416"
+    },
+    {
+      "name": "VPBank",
+      "bin": "970432"
+    }
+  ],
+  "transfer": {
+    "defaultBank": "VietinBank",
+    "minAmount": 1000,
+    "accountMinLength": 6,
+    "accountMaxLength": 20,
+    "defaultMemo": "Chuyen tien",
+    "qrDefaultMemo": "CK",
+    "fee": 0
+  },
+  "storage": {
+    "recipientsKey": "vtb.saved-recipients.v1"
+  },
+  "recipients": [],
+  "transactions": [],
+  "services": [
+    ["transfer", "Chuyển tiền", "transfer"],
+    ["phone", "Nạp điện thoại", "phone"],
+    ["save", "Tiết kiệm", "save"],
+    ["plane", "Vé máy bay", "plane"],
+    ["loan", "Sản phẩm vay", "loan"],
+    ["fund", "Chứng chỉ quỹ", "fund"],
+    ["card", "Dịch vụ thẻ", "card"],
+    ["bill", "Thanh toán HĐ", "bill"],
+    ["history", "Lịch sử GD", "history"],
+    ["gift", "Ưu đãi", "gift"],
+    ["more", "Tất cả DV", "more"]
+  ],
+  "mockServices": {
+    "phone": {
+      "description": "Nạp tiền điện thoại trả trước",
+      "fields": [
+        {
+          "key": "phone",
+          "label": "Số điện thoại",
+          "value": "0912345678",
+          "pattern": "0[0-9]{9}",
+          "inputMode": "tel"
+        },
+        {
+          "key": "network",
+          "label": "Nhà mạng",
+          "options": ["Viettel", "VinaPhone", "MobiFone"]
+        },
+        {
+          "key": "amount",
+          "label": "Mệnh giá",
+          "options": ["50.000 ₫", "100.000 ₫", "200.000 ₫", "500.000 ₫"]
+        }
+      ],
+      "action": "Nạp tiền demo",
+      "result": "Nạp điện thoại mô phỏng thành công"
+    },
+    "save": {
+      "description": "Mở khoản tiết kiệm trực tuyến",
+      "fields": [
+        {
+          "key": "amount",
+          "label": "Số tiền gửi (VND)",
+          "value": "5000000",
+          "type": "number",
+          "min": 1000000
+        },
+        {
+          "key": "term",
+          "label": "Kỳ hạn",
+          "options": ["1 tháng", "3 tháng", "6 tháng", "12 tháng"]
+        },
+        {
+          "key": "renew",
+          "label": "Khi đến hạn",
+          "options": ["Tái tục gốc và lãi", "Chuyển về tài khoản thanh toán"]
+        }
+      ],
+      "action": "Mở tiết kiệm demo",
+      "result": "Đã tạo khoản tiết kiệm mô phỏng"
+    },
+    "plane": {
+      "description": "Tìm và đặt vé máy bay",
+      "fields": [
+        {
+          "key": "from",
+          "label": "Điểm đi",
+          "options": ["TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng"]
+        },
+        {
+          "key": "to",
+          "label": "Điểm đến",
+          "options": ["Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng"]
+        },
+        {
+          "key": "date",
+          "label": "Ngày khởi hành",
+          "type": "date",
+          "value": ""
+        },
+        {
+          "key": "passengers",
+          "label": "Hành khách",
+          "options": ["1 người lớn", "2 người lớn", "2 người lớn, 1 trẻ em"]
+        }
+      ],
+      "action": "Đặt vé demo",
+      "result": "Đã ghi nhận đặt vé mô phỏng"
+    },
+    "loan": {
+      "description": "Đăng ký tư vấn khoản vay",
+      "fields": [
+        {
+          "key": "product",
+          "label": "Sản phẩm",
+          "options": ["Vay tiêu dùng", "Vay mua nhà", "Vay mua ô tô"]
+        },
+        {
+          "key": "amount",
+          "label": "Số tiền vay (VND)",
+          "type": "number",
+          "min": 1000000,
+          "value": "50000000"
+        },
+        {
+          "key": "term",
+          "label": "Thời hạn",
+          "options": ["12 tháng", "24 tháng", "36 tháng"]
+        },
+        {
+          "key": "phone",
+          "label": "Số điện thoại liên hệ",
+          "value": "0912345678",
+          "pattern": "0[0-9]{9}",
+          "inputMode": "tel"
+        }
+      ],
+      "action": "Gửi đăng ký demo",
+      "result": "Đã ghi nhận yêu cầu tư vấn mô phỏng"
+    },
+    "fund": {
+      "description": "Đăng ký mua chứng chỉ quỹ",
+      "fields": [
+        {
+          "key": "fund",
+          "label": "Quỹ đầu tư",
+          "options": [
+            "Quỹ trái phiếu Demo",
+            "Quỹ cân bằng Demo",
+            "Quỹ cổ phiếu Demo"
+          ]
+        },
+        {
+          "key": "amount",
+          "label": "Số tiền đầu tư (VND)",
+          "type": "number",
+          "min": 100000,
+          "value": "1000000"
+        }
+      ],
+      "action": "Đăng ký mua demo",
+      "result": "Đã tạo lệnh mua mô phỏng"
+    },
+    "card": {
+      "description": "Quản lý thẻ VietinBank •••• 3456",
+      "fields": [
+        {
+          "key": "card",
+          "label": "Thẻ",
+          "options": ["Thẻ ghi nợ •••• 3456", "Thẻ tín dụng •••• 6789"]
+        },
+        {
+          "key": "operation",
+          "label": "Thao tác",
+          "options": [
+            "Khóa thẻ tạm thời",
+            "Mở khóa thẻ",
+            "Bật thanh toán trực tuyến",
+            "Tắt thanh toán trực tuyến"
+          ]
+        }
+      ],
+      "action": "Cập nhật thẻ demo",
+      "result": "Đã cập nhật yêu cầu thẻ mô phỏng"
+    },
+    "bill": {
+      "description": "Thanh toán hóa đơn sinh hoạt",
+      "fields": [
+        {
+          "key": "provider",
+          "label": "Nhà cung cấp",
+          "options": [
+            "Điện lực EVN",
+            "Nước sạch",
+            "Internet VNPT",
+            "Internet FPT"
+          ]
+        },
+        {
+          "key": "customer",
+          "label": "Mã khách hàng",
+          "value": "PE01001234567"
+        },
+        {
+          "key": "amount",
+          "label": "Số tiền hóa đơn (VND)",
+          "type": "number",
+          "min": 1000,
+          "value": "725000"
+        }
+      ],
+      "action": "Thanh toán demo",
+      "result": "Thanh toán hóa đơn mô phỏng thành công"
+    },
+    "gift": {
+      "description": "Chọn ưu đãi dành cho bạn",
+      "fields": [
+        {
+          "key": "offer",
+          "label": "Ưu đãi",
+          "options": [
+            "Giảm 50.000 ₫ mua sắm",
+            "Giảm 20% ăn uống",
+            "Hoàn 30.000 ₫ vé phim"
+          ]
+        }
+      ],
+      "action": "Nhận ưu đãi demo",
+      "result": "Đã nhận mã ưu đãi DEMO-VTB-2026"
+    }
+  },
+  "screenTitles": {
+    "transfer": "Chuyển tiền",
+    "qr": "Quét mã QR",
+    "confirm": "Xác nhận chuyển tiền",
+    "success": "Kết quả giao dịch",
+    "history": "Lịch sử giao dịch",
+    "more": "Tất cả dịch vụ",
+    "recipients": "Người nhận đã lưu"
+  },
+  "navigation": [
+    ["home", "Trang chủ"],
+    ["history", "Giao dịch"],
+    ["more", "Dịch vụ"]
+  ],
+  "transferMethods": [
+    ["transfer", "Chuyển tiền thường", "transfer"],
+    ["qr", "Quét QR", "qr"],
+    ["recipients", "Chuyển tiền nhanh", "user"]
+  ]
+}
