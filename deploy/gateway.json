@@ -1,0 +1,24 @@
+{
+  "name": "voice-banking-gw",
+  "displayName": "Voice-Banking-Gateway",
+  "description": "MCP gateway truoc voice-banking-mcp. Agent xac thuc bang IAM, gateway giu API key cua MCP server",
+  "networkMode": "PUBLIC",
+  "flavorId": "<FLAVOR_ID>",
+  "replicas": 1,
+  "inboundAuth": { "mode": "IAM" },
+  "policyGroupId": "<POLICY_GROUP_ID>",
+  "targets": [
+    {
+      "name": "bank",
+      "type": "MCP",
+      "endpoint": "<MCP_RUNTIME_ENDPOINT>/mcp",
+      "outboundAuth": {
+        "type": "APIKEY",
+        "flow": "2LO",
+        "headerName": "X-Api-Key",
+        "headerValuePrefix": "",
+        "providerName": "voice-banking-mcp-key"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "deny-voice-loan-over-500m",
+  "description": "Khong cho tro ly giong noi mo dang ky vay tren 500 trieu. Khoan vay lon lam tai chi nhanh",
+  "statement": {
+    "effect": "deny",
+    "principal": "*",
+    "actions": ["bank__open_loan_screen"],
+    "resources": ["gateway:voice-banking-gw"],
+    "condition": {
+      "greaterThan": { "context.input.amount": 500000000 }
+    }
+  }
+}

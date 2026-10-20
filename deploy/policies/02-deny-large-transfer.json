@@ -1,0 +1,13 @@
+{
+  "name": "deny-voice-transfer-over-100m",
+  "description": "Khong cho tro ly giong noi mo man hinh chuyen tien tren 100 trieu. Khach thao tac truc tiep tren app",
+  "statement": {
+    "effect": "deny",
+    "principal": "*",
+    "actions": ["bank__open_transfer_screen"],
+    "resources": ["gateway:voice-banking-gw"],
+    "condition": {
+      "greaterThan": { "context.input.amount": 100000000 }
+    }
+  }
+}
