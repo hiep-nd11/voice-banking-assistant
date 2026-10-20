@@ -21,6 +21,12 @@ app.include_router(chat_router)
 app.include_router(voice_router)
 
 
+@app.get("/health")
+async def runtime_health():
+    """Health check cho AgentBase Runtime (bắt buộc GET /health trả 200)."""
+    return {"status": "ok"}
+
+
 @app.get("/api/health")
 async def health():
     return {

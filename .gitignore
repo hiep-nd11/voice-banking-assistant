@@ -4,3 +4,7 @@ __pycache__/
 .env
 node_modules/
 .next/
+.env.*
+!.env.example
+*.credentials.json
+.greennode.json
