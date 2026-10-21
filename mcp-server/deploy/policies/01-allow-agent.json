@@ -1,0 +1,10 @@
+{
+  "name": "allow-agent-all-tools",
+  "description": "Cho phep agent (IAM service account cua runtime agent) goi moi tool cua target bank",
+  "statement": {
+    "effect": "allow",
+    "principal": "<PRINCIPAL>",
+    "actions": ["*"],
+    "resources": ["gateway:voice-banking-gw"]
+  }
+}

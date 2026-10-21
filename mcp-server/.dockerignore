@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+!.env.example
+__pycache__
+*.pyc
+.venv
+venv
+.pytest_cache
+tests
+evals
+scripts
+*.md
+db/generate_seed.py
+.agentbase
+.greennode.json
+*.credentials.json
