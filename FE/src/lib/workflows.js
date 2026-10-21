@@ -10,6 +10,8 @@ export const workflowScreens = new Set([
   "history",
   "analytics",
   "finance",
+  "card_open",
+  "card_lock",
 ]);
 export const workflowFeatures = new Set([
   "budget",

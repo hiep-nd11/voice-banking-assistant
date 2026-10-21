@@ -46,7 +46,7 @@
       "sacombank"
     ]
   },
-  "non_action_pattern": "\\b(huong dan|cach|lam sao|nhu the nao|neu)\\b|\\b(khong|dung)\\s+(muon\\s+)?(chuyen|gui|vay)\\b",
+  "non_action_pattern": "\\b(huong dan|cach|lam sao|nhu the nao|neu)\\b|\\b(khong|dung)\\s+(muon\\s+)?(chuyen|gui|vay|mo|khoa|lam)\\b",
   "scenarios": {
     "transfer_account": {
       "kind": "flow",
@@ -195,6 +195,20 @@
       "screen": "recipients",
       "lookup": null,
       "clear_pending": true
+    },
+    "open_card": {
+      "kind": "navigation",
+      "screen": "card_open",
+      "lookup": null,
+      "clear_pending": true,
+      "message": "card_open_opened"
+    },
+    "lock_card": {
+      "kind": "navigation",
+      "screen": "card_lock",
+      "lookup": null,
+      "clear_pending": true,
+      "message": "card_lock_opened"
     }
   },
   "rules": [
@@ -350,6 +364,32 @@
       "when": {
         "pattern": "\\b(khoan vay|du no|ky tra|tra no)\\b"
       }
+    },
+    {
+      "intent": "lock_card",
+      "when": {
+        "any": [
+          {
+            "pattern": "\\b(khoa|chan)\\b(\\s+\\w+){0,2}\\s+the\\b"
+          },
+          {
+            "pattern": "\\b(mat|danh roi|bi trom)\\s+the\\b"
+          }
+        ]
+      }
+    },
+    {
+      "intent": "open_card",
+      "when": {
+        "any": [
+          {
+            "pattern": "\\b(mo|lam|dang k[yi]|tao|xin|muon)\\b(\\s+\\w+){0,3}\\s+the tin dung\\b"
+          },
+          {
+            "pattern": "\\b(mo|lam)\\s+the\\s+moi\\b"
+          }
+        ]
+      }
     }
   ],
   "messages": {
@@ -402,6 +442,8 @@
     "account_prepared": "Thông tin chuyển khoản đã sẵn sàng để kiểm tra. Backend chưa có API thực thi chuyển khoản theo số tài khoản; chưa có tiền nào được chuyển.",
     "invalid_preparation_result": "Nguồn dữ liệu không xác nhận được yêu cầu chuẩn bị.",
     "request_prepared": "Đã tạo yêu cầu chuẩn bị. Anh xem thông tin trên màn hình; chưa có giao dịch nào được thực hiện.",
-    "unsupported_event": "Sự kiện không được hỗ trợ."
+    "unsupported_event": "Sự kiện không được hỗ trợ.",
+    "card_open_opened": "Em đã mở màn hình đăng ký thẻ tín dụng. Anh chọn loại thẻ và hạn mức, kiểm tra thông tin rồi tự bấm gửi đăng ký nhé. Em không tự mở thẻ, ngân hàng sẽ thẩm định trước khi phát hành.",
+    "card_lock_opened": "Em đã mở màn hình khóa thẻ. Anh chọn đúng thẻ rồi tự bấm khóa và xác nhận nhé. Nếu mất thẻ hoặc nghi bị lừa đảo, anh gọi ngay tổng đài ngân hàng."
   }
 }

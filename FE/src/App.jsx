@@ -27,6 +27,8 @@ import { emptyTransfer, validateTransfer } from "./lib/transfer.js";
 
 const titles = config.screenTitles;
 
+const DISPLAY_ONLY_SERVICES = new Set(["card", "card_open", "card_lock"]);
+
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [financeInitial, setFinanceInitial] = useState("month");
@@ -311,6 +313,8 @@ export default function App() {
     go("success");
   }
   function payService(id, values) {
+    // Màn hình thẻ chỉ hiển thị giao diện mô phỏng, không cần backend thực hiện.
+    if (DISPLAY_ONLY_SERVICES.has(id)) return "";
     if (config.bankingSource === "mcp") return "Backend chưa hỗ trợ thực hiện dịch vụ này.";
     if (!["phone", "save", "fund", "bill"].includes(id)) return "";
     const amount = Number(String(values.amount).replace(/[^0-9]/g, ""));

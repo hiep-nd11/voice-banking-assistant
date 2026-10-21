@@ -21,6 +21,8 @@ SCREENS = {
     "qr",
     "transfer",
     "workflow",
+    "card_open",
+    "card_lock",
 }
 LOOKUPS = {"get_account_balances", "get_recent_transactions", "get_month_overview"}
 
@@ -42,6 +44,7 @@ class Scenario(BaseModel):
     feature: Literal["budget"] | None = None
     lookup: str | None = None
     clear_pending: bool = False
+    message: str | None = None  # lời thoại khi mở màn hình (key trong messages)
     minimum: int = Field(default=1000, ge=1000)
     terms: list[int] = Field(default_factory=list)
     max_term: int = Field(default=300, ge=1, le=300)
@@ -184,6 +187,9 @@ class WorkflowConfig(BaseModel):
         for rule in self.rules:
             if rule.intent not in self.scenarios:
                 raise ValueError(f"Unknown intent: {rule.intent}")
+        for key, scenario in self.scenarios.items():
+            if scenario.message is not None and scenario.message not in self.messages:
+                raise ValueError(f"Scenario {key} uses unknown message: {scenario.message}")
         for scenario in self.scenarios.values():
             for requirement in scenario.requirements:
                 if requirement.message not in self.messages:

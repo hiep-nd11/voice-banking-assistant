@@ -327,9 +327,8 @@ async def start(session, intent, text, recipient_name=None):
         screen, feature = scenario.screen, scenario.feature
         lookup = scenario.lookup
         data = await tool(lookup) if lookup else {}
-        return events(
-            session, data.get("speech") or workflow_message("navigation_opened"), screen, feature
-        )
+        text = data.get("speech") or workflow_message(scenario.message or "navigation_opened")
+        return events(session, text, screen, feature)
     flow = {
         "id": str(uuid.uuid4()),
         "intent": intent,
