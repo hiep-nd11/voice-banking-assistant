@@ -110,8 +110,7 @@ mock dịch vụ ngoài, không cần API key thật.
 - **Dữ liệu:** toàn bộ là dữ liệu mô phỏng (mock/synthetic) sinh bởi
   `mcp-server/db/generate_seed.py`. Không dùng dữ liệu khách hàng thật.
   Lãi suất và sản phẩm là giả lập.
-- **Code:** viết trong thời gian cuộc thi, có sử dụng trợ lý lập trình AI
-  (Claude, Claude Code). Thư viện mã nguồn mở theo `requirements.txt` /
+- **Code:** viết trong thời gian cuộc thi. Thư viện mã nguồn mở theo `requirements.txt` /
   `package.json` của từng thành phần.
 - **Model:** LLM trên GreenNode MaaS; mô hình ASR ONNX trong `asr-system/models`.
 - **Bí mật:** không commit key/mật khẩu; cấu hình qua biến môi trường
