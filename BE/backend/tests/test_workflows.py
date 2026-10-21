@@ -243,6 +243,38 @@ class BankingWorkflowTests(unittest.TestCase):
         self.send("prepare", {})
         self.assertEqual(self.flow["step"], "prepared")
 
+    def mcp_calls(self, name):
+        return [call.args[1] for call in self.mcp.await_args_list if call.args[0] == name]
+
+    def test_quick_recipient_prepare_never_sends_list_position_as_mcp_beneficiary(self):
+        # "Khác" đứng đầu danh sách chuyển nhanh -> beneficiary_id nội bộ = 1, nhưng id 1 trong
+        # danh bạ MCP là người khác. Gửi sang MCP sẽ điền nhầm người nhận.
+        self.chat("chuyển tiền cho Khác 2tr")
+        self.assertTrue(self.flow["demo_transfer"])
+        self.assertEqual(self.flow["slots"]["beneficiary"]["name"], "Người khác")
+        self.send("prepare", {})
+        self.assertEqual(self.flow["step"], "prepared")
+        for name in ("check_transfer_risk", "open_transfer_screen"):
+            calls = self.mcp_calls(name)
+            self.assertTrue(calls, name)
+            self.assertNotIn("beneficiary_id", calls[-1], name)
+
+    def test_switching_from_mcp_to_quick_recipient_does_not_reuse_list_position(self):
+        self.chat("chuyển tiền cho con trai 5tr")
+        self.assertFalse(self.flow["demo_transfer"])
+        self.send("change_recipient", {})
+        self.send("recipient_selected", {"beneficiary_id": 1})
+        self.assertEqual(self.flow["slots"]["beneficiary"]["name"], "Người khác")
+        self.send("prepare", {})
+        self.assertNotIn("beneficiary_id", self.mcp_calls("open_transfer_screen")[-1])
+
+    def test_mcp_recipient_prepare_sends_real_beneficiary_id(self):
+        self.quick_recipients = []
+        self.chat("chuyển tiền cho con trai 5tr")
+        self.send("prepare", {})
+        self.assertEqual(self.mcp_calls("open_transfer_screen")[-1]["beneficiary_id"], 2)
+        self.assertEqual(self.mcp_calls("check_transfer_risk")[-1]["beneficiary_id"], 2)
+
     def test_customer_relationship_with_multiple_matches_requires_selection(self):
         self.quick_recipients = []
         self.chat("chuyển tiền cho con 5tr")
