@@ -3,8 +3,26 @@
 Ứng dụng demo ngân hàng với React/Vite và FastAPI: trợ lý chat/voice, tài sản,
 giao dịch, phân tích thu chi và chuyển tiền mô phỏng.
 
-Workspace chứa hai Git repository riêng: `FE/` và `BE/`. Compose ở thư mục này
-là cách chạy tích hợp; commit thay đổi tại từng repository tương ứng.
+## Thành phần
+
+| Thư mục | Thành phần | Tài liệu |
+| --- | --- | --- |
+| `FE/` | Giao diện React/Vite (nginx, cổng 8080) | [FE/README.md](FE/README.md) |
+| `BE/` | Agent backend FastAPI: ReAct + function calling, workflow, ASR/TTS | [BE/README.md](BE/README.md) |
+| `mcp-server/` | MCP server 20 tool + REST, schema PostgreSQL, dữ liệu mock, cấu hình MCP Gateway/Policy | [mcp-server/README.md](mcp-server/README.md), [mcp-server/CONTRACT.md](mcp-server/CONTRACT.md) |
+| `asr-system/` | Dịch vụ nhận dạng giọng nói (ONNX) | `asr-system/run.sh`, `asr-system/deploy.sh` |
+
+```
+FE ──/api──▶ BE (agent, LLM GreenNode MaaS) ──MCP──▶ mcp-server ──▶ PostgreSQL (vDB)
+                 └──▶ asr-system (speech-to-text)
+```
+
+Trên GreenNode AgentBase, `BE/backend` và `mcp-server` chạy thành hai Custom Agent
+runtime riêng (cổng 8080, `GET /health`). Biến môi trường nạp lúc tạo/cập nhật
+runtime, không nằm trong image hay repo.
+
+`compose.yaml` ở thư mục này chạy FE + BE; MCP server và DB chạy riêng theo
+`mcp-server/README.md`.
 
 ## Chạy bằng Docker
 
@@ -83,3 +101,18 @@ mock dịch vụ ngoài, không cần API key thật.
 - [Hợp đồng workflow/SSE](BE/docs/workflow-client.md)
 - [Chỉnh kịch bản và prompt](BE/docs/workflow-configuration.md)
 - [Voice hiện tại và phương án streaming](BE/docs/voice-streaming-client.md)
+- [MCP server, dữ liệu mock và deploy](mcp-server/README.md)
+- [Hợp đồng tích hợp MCP ↔ agent ↔ giao diện](mcp-server/CONTRACT.md)
+- [MCP Gateway + Policy Group](mcp-server/deploy/GATEWAY.md)
+
+## Khai báo xuất xứ và dữ liệu
+
+- **Dữ liệu:** toàn bộ là dữ liệu mô phỏng (mock/synthetic) sinh bởi
+  `mcp-server/db/generate_seed.py`. Không dùng dữ liệu khách hàng thật.
+  Lãi suất và sản phẩm là giả lập.
+- **Code:** viết trong thời gian cuộc thi, có sử dụng trợ lý lập trình AI
+  (Claude, Claude Code). Thư viện mã nguồn mở theo `requirements.txt` /
+  `package.json` của từng thành phần.
+- **Model:** LLM trên GreenNode MaaS; mô hình ASR ONNX trong `asr-system/models`.
+- **Bí mật:** không commit key/mật khẩu; cấu hình qua biến môi trường
+  (`.env` local, env của AgentBase Runtime). Xem `.env.example` của từng thành phần.
