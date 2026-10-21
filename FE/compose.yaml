@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: ../BE/backend
+    volumes:
+      - ../BE/backend/app/config:/app/app/config:ro
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+    env_file:
+      - path: ../BE/.env
+        required: false
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+  fe:
+    image: vtb-fe:local
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    volumes:
+      - ./public/app-config.json:/usr/share/nginx/html/app-config.json:ro
+    restart: unless-stopped

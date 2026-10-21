@@ -1,0 +1,21 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.credentials.json
+.greennode.json
+.agentbase/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log

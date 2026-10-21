@@ -1,0 +1,724 @@
+[
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Ngày hôm nay và các mốc (đầu tuần, tháng này, tháng trước). Gọi trước khi tính khoảng ngày.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object",
+      "title": "get_current_dateArguments"
+    },
+    "name": "get_current_date"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Hiểu số tiền trong câu nói tiếng Việt ('một triệu rưỡi', '500k', 'hai củ', '1tr2') -> số VND chính xác\n    và câu đọc lại để khách xác nhận. LUÔN dùng tool này thay vì tự đổi chữ ra số.",
+    "inputSchema": {
+      "properties": {
+        "text": {
+          "description": "Nguyên văn câu khách nói",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "type": "object",
+      "title": "parse_vnd_amountArguments"
+    },
+    "name": "parse_vnd_amount"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Tên, cách xưng hô, tuổi, nhu cầu hỗ trợ (vd mắt kém) của khách đang đăng nhập.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object",
+      "title": "get_customer_profileArguments"
+    },
+    "name": "get_customer_profile"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Số dư tài khoản thanh toán, các sổ tiết kiệm mở từ tài khoản (ngày đến hạn), khoản vay (kỳ trả tiếp theo).",
+    "inputSchema": {
+      "properties": {},
+      "type": "object",
+      "title": "get_account_balancesArguments"
+    },
+    "name": "get_account_balances"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Mấy giao dịch gần nhất ('dạo này tôi tiêu gì', 'vừa rồi có ai chuyển tiền cho tôi không').",
+    "inputSchema": {
+      "properties": {
+        "limit": {
+          "default": 5,
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "enum": [
+                "in",
+                "out"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "in = tiền vào, out = tiền ra",
+          "title": "Direction"
+        }
+      },
+      "type": "object",
+      "title": "get_recent_transactionsArguments"
+    },
+    "name": "get_recent_transactions"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Tìm giao dịch cụ thể + tổng tiền khớp điều kiện ('tháng này tôi trả tiền điện bao nhiêu', 'đóng học phí khi nào').",
+    "inputSchema": {
+      "properties": {
+        "date_from": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date From",
+          "type": "string"
+        },
+        "date_to": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date To",
+          "type": "string"
+        },
+        "category": {
+          "anyOf": [
+            {
+              "description": "Danh mục: mã (electricity, groceries...) hoặc cách nói tiếng Việt ('tiền điện', 'đi chợ', 'học phí')",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Từ khóa trong nội dung/người nhận, vd 'hoc phi', 'shopee'",
+          "title": "Keyword"
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "enum": [
+                "in",
+                "out"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction"
+        },
+        "min_amount": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Amount"
+        },
+        "limit": {
+          "default": 10,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date_from",
+        "date_to"
+      ],
+      "type": "object",
+      "title": "search_transactionsArguments"
+    },
+    "name": "search_transactions"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Tổng quan 1 tháng: thu, chi, còn dư, 3 khoản chi lớn nhất, so với tháng trước. Dùng cho câu hỏi chung\n    'tháng này tôi tiêu thế nào'.",
+    "inputSchema": {
+      "properties": {
+        "month": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tháng dạng YYYY-MM; bỏ trống = tháng này",
+          "title": "Month"
+        }
+      },
+      "type": "object",
+      "title": "get_month_overviewArguments"
+    },
+    "name": "get_month_overview"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Tổng chi tiêu trong khoảng ngày, chia theo danh mục/tháng/nơi chi/nhóm (không tính gửi tiết kiệm, đầu tư, cho mượn).",
+    "inputSchema": {
+      "properties": {
+        "date_from": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date From",
+          "type": "string"
+        },
+        "date_to": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date To",
+          "type": "string"
+        },
+        "group_by": {
+          "default": "category",
+          "enum": [
+            "category",
+            "month",
+            "merchant",
+            "group"
+          ],
+          "title": "Group By",
+          "type": "string"
+        },
+        "top": {
+          "default": 5,
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Top",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date_from",
+        "date_to"
+      ],
+      "type": "object",
+      "title": "get_spending_summaryArguments"
+    },
+    "name": "get_spending_summary"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Tổng tiền nhận được (lương, thưởng, cho thuê, lãi...) trong khoảng ngày.",
+    "inputSchema": {
+      "properties": {
+        "date_from": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date From",
+          "type": "string"
+        },
+        "date_to": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date_from",
+        "date_to"
+      ],
+      "type": "object",
+      "title": "get_income_summaryArguments"
+    },
+    "name": "get_income_summary"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "So sánh chi tiêu kỳ A (cũ) với kỳ B (mới), toàn bộ hoặc một danh mục.",
+    "inputSchema": {
+      "properties": {
+        "a_from": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "A From",
+          "type": "string"
+        },
+        "a_to": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "A To",
+          "type": "string"
+        },
+        "b_from": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "B From",
+          "type": "string"
+        },
+        "b_to": {
+          "description": "Ngày dạng YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "B To",
+          "type": "string"
+        },
+        "category": {
+          "anyOf": [
+            {
+              "description": "Danh mục: mã (electricity, groceries...) hoặc cách nói tiếng Việt ('tiền điện', 'đi chợ', 'học phí')",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        }
+      },
+      "required": [
+        "a_from",
+        "a_to",
+        "b_from",
+        "b_to"
+      ],
+      "type": "object",
+      "title": "compare_periodsArguments"
+    },
+    "name": "compare_periods"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Một khoản theo từng tháng ('tiền điện mấy tháng nay thế nào'), kèm trung bình và so sánh tháng này.",
+    "inputSchema": {
+      "properties": {
+        "category": {
+          "description": "Danh mục: mã (electricity, groceries...) hoặc cách nói tiếng Việt ('tiền điện', 'đi chợ', 'học phí')",
+          "title": "Category",
+          "type": "string"
+        },
+        "months": {
+          "default": 6,
+          "maximum": 18,
+          "minimum": 2,
+          "title": "Months",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "type": "object",
+      "title": "get_category_trendArguments"
+    },
+    "name": "get_category_trend"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Rà soát giao dịch bất thường (mặc định 30 ngày gần nhất): người nhận lạ số tiền lớn, giờ khuya, chuyển liên tiếp,\n    bị trừ trùng, hóa đơn tăng vọt, nội dung giống lừa đảo. Mỗi giao dịch kèm lý do.",
+    "inputSchema": {
+      "properties": {
+        "date_from": {
+          "anyOf": [
+            {
+              "description": "Ngày dạng YYYY-MM-DD",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date From"
+        },
+        "date_to": {
+          "anyOf": [
+            {
+              "description": "Ngày dạng YYYY-MM-DD",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date To"
+        }
+      },
+      "type": "object",
+      "title": "detect_unusual_transactionsArguments"
+    },
+    "name": "detect_unusual_transactions"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Tìm người nhận trong danh bạ đã lưu của khách theo tên hoặc cách gọi thân mật.",
+    "inputSchema": {
+      "properties": {
+        "name": {
+          "description": "Tên/cách gọi: 'con trai', 'mẹ', 'cô Hoa'",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "title": "find_beneficiaryArguments"
+    },
+    "name": "find_beneficiary"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Danh bạ người nhận đã lưu (số tài khoản đã che).",
+    "inputSchema": {
+      "properties": {},
+      "type": "object",
+      "title": "list_beneficiariesArguments"
+    },
+    "name": "list_beneficiaries"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Sản phẩm tiết kiệm/vay và lãi suất tham khảo (dữ liệu MOCK).",
+    "inputSchema": {
+      "properties": {
+        "product_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "savings",
+                "loan"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Type"
+        },
+        "term_months": {
+          "anyOf": [
+            {
+              "maximum": 36,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Term Months"
+        }
+      },
+      "type": "object",
+      "title": "search_productsArguments"
+    },
+    "name": "search_products"
+  },
+  {
+    "annotations": {
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Kiểm tra rủi ro trước khi chuyển: thiếu số dư, số tiền lớn bất thường, người nhận lạ, giờ khuya, nội dung lừa đảo.",
+    "inputSchema": {
+      "properties": {
+        "amount": {
+          "description": "Số tiền VND (số nguyên), lấy từ parse_vnd_amount",
+          "minimum": 1000,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "beneficiary_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Beneficiary Id"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "amount"
+      ],
+      "type": "object",
+      "title": "check_transfer_riskArguments"
+    },
+    "name": "check_transfer_risk"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Mở màn hình CHUYỂN TIỀN trên app và điền sẵn số tiền (và người nhận nếu có). KHÔNG chuyển tiền: khách tự nhập\n    phần còn lại và tự xác nhận OTP. Gọi sau khi khách đã xác nhận số tiền đọc lại.",
+    "inputSchema": {
+      "properties": {
+        "amount": {
+          "description": "Số tiền VND (số nguyên), lấy từ parse_vnd_amount",
+          "minimum": 1000,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "beneficiary_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Chỉ truyền khi find_beneficiary trả đúng 1 người",
+          "title": "Beneficiary Id"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "maxLength": 140,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Nội dung chuyển khoản nếu khách đã nói",
+          "title": "Note"
+        },
+        "risk_acknowledged": {
+          "default": false,
+          "description": "true chỉ khi khách đã nghe cảnh báo rủi ro cao và nói rõ vẫn muốn tiếp tục",
+          "title": "Risk Acknowledged",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "amount"
+      ],
+      "type": "object",
+      "title": "open_transfer_screenArguments"
+    },
+    "name": "open_transfer_screen"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Mở màn hình GỬI TIẾT KIỆM ONLINE và điền sẵn số tiền (và kỳ hạn). KHÔNG tự mở sổ.",
+    "inputSchema": {
+      "properties": {
+        "amount": {
+          "description": "Số tiền VND (số nguyên), lấy từ parse_vnd_amount",
+          "minimum": 1000,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "term_months": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Kỳ hạn nếu khách đã nói: 1,3,6,9,12,24",
+          "title": "Term Months"
+        }
+      },
+      "required": [
+        "amount"
+      ],
+      "type": "object",
+      "title": "open_savings_screenArguments"
+    },
+    "name": "open_savings_screen"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Mở màn hình ĐĂNG KÝ VAY và điền sẵn số tiền (loại vay, thời hạn nếu có). Chỉ là đăng ký, ngân hàng còn thẩm định.",
+    "inputSchema": {
+      "properties": {
+        "amount": {
+          "description": "Số tiền VND (số nguyên), lấy từ parse_vnd_amount",
+          "minimum": 1000,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "loan_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Chỉ truyền khi khách đã nói rõ loại vay: VAY_TIEU_DUNG / VAY_CAM_CO_STK / VAY_MUA_OTO / VAY_MUA_NHA hoặc cách nói ('cầm cố sổ tiết kiệm', 'mua nhà'). Bỏ trống thì khách tự chọn trên màn hình",
+          "title": "Loan Type"
+        },
+        "term_months": {
+          "anyOf": [
+            {
+              "maximum": 300,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Term Months"
+        }
+      },
+      "required": [
+        "amount"
+      ],
+      "type": "object",
+      "title": "open_loan_screenArguments"
+    },
+    "name": "open_loan_screen"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Hủy màn hình đã chuẩn bị khi khách đổi ý ('thôi, không chuyển nữa').",
+    "inputSchema": {
+      "properties": {
+        "action_id": {
+          "title": "Action Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action_id"
+      ],
+      "type": "object",
+      "title": "cancel_pending_actionArguments"
+    },
+    "name": "cancel_pending_action"
+  }
+]

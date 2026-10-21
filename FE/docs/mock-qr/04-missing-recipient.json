@@ -1,0 +1,7 @@
+{
+  "bank": "VietinBank",
+  "account": "106888123456",
+  "recipient": "",
+  "amount": "100000",
+  "memo": "Demo missing recipient"
+}
