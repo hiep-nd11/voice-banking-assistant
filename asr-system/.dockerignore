@@ -1,0 +1,18 @@
+# Secrets
+.env
+.env.*
+.greennode.json
+*credentials*.json
+
+# Dev / test
+test/
+**/__pycache__/
+**/*.pyc
+.venv/
+venv/
+.git/
+.agentbase/
+
+# Không dùng wake word nữa
+openwakeword-main/
+models/hey_carpa*.onnx
