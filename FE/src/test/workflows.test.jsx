@@ -65,6 +65,11 @@ it("blocks high risk without explicit screen acknowledgement and never sends an 
 
 it("only allows known navigation destinations and report features", () => {
   expect(allowedNavigation({ type: "ui_action", action: "navigate", screen: "qr" })).toBe(true);
+  for (const screen of ["card_open", "card_lock"]) {
+    expect(allowedNavigation({ type: "ui_action", action: "navigate", screen })).toBe(true);
+    expect(base.mockServices[screen].fields.length).toBeGreaterThan(0);
+    expect(base.screenTitles[screen]).toBeTruthy();
+  }
   expect(
     allowedNavigation({
       type: "ui_action",

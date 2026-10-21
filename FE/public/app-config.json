@@ -66,6 +66,8 @@
     ["loan", "Sản phẩm vay", "loan"],
     ["fund", "Chứng chỉ quỹ", "fund"],
     ["card", "Dịch vụ thẻ", "card"],
+    ["card_open", "Mở thẻ tín dụng", "card"],
+    ["card_lock", "Khóa thẻ", "shield"],
     ["bill", "Thanh toán HĐ", "bill"],
     ["history", "Lịch sử GD", "history"],
     ["gift", "Ưu đãi", "gift"],
@@ -220,6 +222,60 @@
       "action": "Cập nhật thẻ demo",
       "result": "Đã cập nhật yêu cầu thẻ mô phỏng"
     },
+    "card_open": {
+      "description": "Đăng ký mở thẻ tín dụng VietinBank",
+      "fields": [
+        {
+          "key": "product",
+          "label": "Loại thẻ",
+          "options": [
+            "VietinBank Visa Classic",
+            "VietinBank Visa Gold",
+            "VietinBank JCB Platinum",
+            "VietinBank Mastercard Cashback"
+          ]
+        },
+        {
+          "key": "limit",
+          "label": "Hạn mức mong muốn",
+          "options": ["20.000.000 ₫", "50.000.000 ₫", "100.000.000 ₫", "200.000.000 ₫"]
+        },
+        {
+          "key": "income",
+          "label": "Thu nhập hằng tháng",
+          "options": ["Dưới 15 triệu", "15 – 30 triệu", "30 – 60 triệu", "Trên 60 triệu"]
+        },
+        {
+          "key": "delivery",
+          "label": "Nhận thẻ tại",
+          "options": ["Địa chỉ nhà riêng", "Chi nhánh gần nhất"]
+        }
+      ],
+      "action": "Gửi đăng ký mở thẻ (demo)",
+      "result": "Đã ghi nhận đăng ký mở thẻ tín dụng (mô phỏng). Ngân hàng sẽ thẩm định trước khi phát hành thẻ."
+    },
+    "card_lock": {
+      "description": "Khóa hoặc mở khóa thẻ VietinBank",
+      "fields": [
+        {
+          "key": "card",
+          "label": "Thẻ",
+          "options": ["Thẻ tín dụng •••• 6789", "Thẻ ghi nợ •••• 3456"]
+        },
+        {
+          "key": "operation",
+          "label": "Thao tác",
+          "options": [
+            "Khóa thẻ tạm thời",
+            "Khóa thẻ do mất thẻ",
+            "Khóa thẻ do nghi bị lừa đảo",
+            "Mở khóa thẻ"
+          ]
+        }
+      ],
+      "action": "Xác nhận (demo)",
+      "result": "Đã cập nhật trạng thái thẻ (mô phỏng). Nếu mất thẻ, anh gọi ngay tổng đài ngân hàng."
+    },
     "bill": {
       "description": "Thanh toán hóa đơn sinh hoạt",
       "fields": [
@@ -264,7 +320,9 @@
     "success": "Kết quả giao dịch",
     "history": "Lịch sử giao dịch",
     "more": "Tất cả dịch vụ",
-    "recipients": "Người nhận đã lưu"
+    "recipients": "Người nhận đã lưu",
+    "card_open": "Mở thẻ tín dụng",
+    "card_lock": "Khóa thẻ"
   },
   "navigation": [
     ["home", "Trang chủ"],

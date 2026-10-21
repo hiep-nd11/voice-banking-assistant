@@ -275,6 +275,34 @@ class BankingWorkflowTests(unittest.TestCase):
         self.assertEqual(self.mcp_calls("open_transfer_screen")[-1]["beneficiary_id"], 2)
         self.assertEqual(self.mcp_calls("check_transfer_risk")[-1]["beneficiary_id"], 2)
 
+    def test_card_intents_from_speech(self):
+        cases = {
+            "Mở thẻ tín dụng giúp tôi": "open_card",
+            "tôi muốn đăng ký thẻ tín dụng": "open_card",
+            "làm thẻ tín dụng mới": "open_card",
+            "Khóa thẻ giúp tôi": "lock_card",
+            "khoá thẻ tín dụng của tôi": "lock_card",
+            "mở khóa thẻ": "lock_card",
+            "tôi bị mất thẻ rồi": "lock_card",
+            "Làm sao để khóa thẻ": None,
+            "không mở thẻ tín dụng đâu": None,
+            "Chuyển cho Khoa 2 triệu": "transfer_recipient",
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(intent_for(text), expected)
+
+    def test_card_screens_only_navigate_without_calling_bank(self):
+        for text, screen in (("Mở thẻ tín dụng", "card_open"), ("Khóa thẻ", "card_lock")):
+            with self.subTest(text=text):
+                self.mcp.reset_mock()
+                rows = self.chat(text)
+                navigation = [row for row in rows if row["type"] == "ui_action"]
+                self.assertEqual([row["screen"] for row in navigation], [screen])
+                reply = "".join(row.get("content", "") for row in rows if row["type"] == "token")
+                self.assertIn("Em đã mở màn hình", reply)
+                self.assertFalse(self.mcp.await_args_list, "Chỉ mở giao diện, không gọi MCP")
+
     def test_customer_relationship_with_multiple_matches_requires_selection(self):
         self.quick_recipients = []
         self.chat("chuyển tiền cho con 5tr")
@@ -520,3 +548,4 @@ class BankingWorkflowTests(unittest.TestCase):
         rows = self.chat("Chuyển tiền nhanh")
         self.assertIsNone(self.flow)
         self.assertTrue(any(row.get("screen") == "recipients" for row in rows))
+
