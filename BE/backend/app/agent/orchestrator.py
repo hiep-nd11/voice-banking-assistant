@@ -28,7 +28,7 @@ from app.core.config import settings
 from app.core.tts import TTSError, synthesize
 
 # Gọi tool qua MCP server (voice-banking-assistant, cùng máy/URL theo settings.mcp_base_url)
-from app.tools.mcp_client import dispatch_tool
+from app.tools.mcp_client import call_mcp, dispatch_tool
 from app.tools.registry import TOOL_SCHEMAS
 
 MAX_TOOL_RESULT_CHARS = 4000
@@ -87,6 +87,25 @@ async def _call_llm(messages: list[dict]) -> tuple[str, list[dict]]:
     return "".join(content_parts), parsed_calls
 
 
+async def _date_context() -> dict | None:
+    """Ngày hôm nay theo MCP (tôn trọng DEMO_NOW) để LLM không tự đoán sai năm khi tính ngày."""
+    try:
+        today = await call_mcp("get_current_date", {})
+    except Exception:
+        return None
+    if not isinstance(today, dict) or not today.get("today"):
+        return None
+    year = str(today["today"])[:4]
+    return {
+        "role": "system",
+        "content": (
+            f"Hôm nay là {today.get('weekday', '')} {today['today']} (YYYY-MM-DD). "
+            f"Khi khách nói ngày/tháng mà không nói năm thì dùng năm {year}; "
+            "tính 'hôm qua', 'tuần trước', 'tháng này' từ ngày hôm nay."
+        ),
+    }
+
+
 async def run_agent(
     user_message: str,
     session_id: str | None,
@@ -137,6 +156,9 @@ async def run_agent(
     messages: list[dict] = [
         {"role": "system", "content": build_system_prompt(settings.max_agent_steps)}
     ]
+    date_context = await _date_context()
+    if date_context:
+        messages.append(date_context)
     messages.extend(store.history(session.session_id))
     messages.append({"role": "user", "content": user_message})
 

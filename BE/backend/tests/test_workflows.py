@@ -335,6 +335,15 @@ class BankingWorkflowTests(unittest.TestCase):
         self.assertEqual(intent_for("3 giao dịch gần nhất"), "transactions")
         self.assertEqual(intent_for("lịch sử giao dịch"), "transactions")
 
+    def test_model_receives_todays_date_from_mcp(self):
+        today = {"today": "2026-10-22", "weekday": "thứ Năm"}
+        with patch("app.agent.orchestrator.call_mcp", new=AsyncMock(return_value=today)):
+            self.chat("Thống kê giao dịch ngày 15 tháng 10")
+        messages = self.llm.await_args_list[-1].args[0]
+        context = " ".join(m["content"] for m in messages if m["role"] == "system")
+        self.assertIn("2026-10-22", context)
+        self.assertIn("năm 2026", context)
+
     def test_customer_relationship_with_multiple_matches_requires_selection(self):
         self.quick_recipients = []
         self.chat("chuyển tiền cho con 5tr")
