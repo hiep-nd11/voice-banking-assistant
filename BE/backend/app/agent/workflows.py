@@ -202,9 +202,22 @@ def quick_candidates(session):
             "bank": row["bank"],
             "account_number": row["account"],
             "relationship": workflow_message("quick_transfer_label"),
+            "source": "quick",
         }
         for i, row in enumerate(session.quick_recipients)
     ]
+
+
+def mcp_beneficiary_id(slots):
+    """beneficiary_id hợp lệ để gửi sang MCP, hoặc None.
+
+    Người nhận chuyển nhanh (danh sách của FE) có beneficiary_id là VỊ TRÍ trong danh sách đó,
+    không phải id trong danh bạ MCP. Gửi sang MCP sẽ điền nhầm người khác (id 1 = vợ...).
+    """
+    beneficiary = slots.get("beneficiary")
+    if not beneficiary or beneficiary.get("source") == "quick":
+        return None
+    return beneficiary["beneficiary_id"]
 
 
 async def choose_recipient(session, flow, name):
@@ -271,8 +284,8 @@ async def advance(session):
         return events(session, workflow_message("unsupported_term"), "workflow")
     if flow["intent"].startswith("transfer") and not flow.get("demo_transfer"):
         risk_args = {"amount": slots["amount"], "note": slots.get("note", "")}
-        if slots.get("beneficiary"):
-            risk_args["beneficiary_id"] = slots["beneficiary"]["beneficiary_id"]
+        if mcp_beneficiary_id(slots) is not None:
+            risk_args["beneficiary_id"] = mcp_beneficiary_id(slots)
         flow["risk"] = await tool("check_transfer_risk", risk_args)
         if flow["risk"].get("insufficient_balance"):
             flow["step"] = "awaiting_amount"
@@ -473,6 +486,7 @@ async def handle_event(session, event, payload):
             await choose_recipient(session, flow, name)
         else:
             flow["candidates"] = quick_candidates(session)
+            flow["demo_transfer"] = True
         await discard_pending(flow)
     elif event == "recipient_selected":
         if flow["intent"] != "transfer_recipient":
@@ -558,10 +572,11 @@ async def handle_event(session, event, payload):
     elif event == "prepare":
         if flow["step"] != "review":
             raise WorkflowError(workflow_message("review_required"))
+        beneficiary_id = mcp_beneficiary_id(slots)
         if flow["intent"].startswith("transfer"):
             risk_args = {"amount": slots["amount"], "note": slots.get("note", "")}
-            if slots.get("beneficiary"):
-                risk_args["beneficiary_id"] = slots["beneficiary"]["beneficiary_id"]
+            if beneficiary_id is not None:
+                risk_args["beneficiary_id"] = beneficiary_id
             flow["risk"] = await tool("check_transfer_risk", risk_args)
             if (
                 flow["risk"].get("insufficient_balance")
@@ -587,10 +602,11 @@ async def handle_event(session, event, payload):
             args["term_months"] = slots["term_months"]
         if flow["intent"] == "transfer_recipient":
             args.update(
-                beneficiary_id=slots["beneficiary"]["beneficiary_id"],
                 note=slots.get("note", ""),
                 risk_acknowledged=payload.get("risk_acknowledged") is True,
             )
+            if beneficiary_id is not None:
+                args["beneficiary_id"] = beneficiary_id
         result = await tool(name, args)
         action_id = result.get("ui_action", {}).get("action_id")
         if not action_id or result.get("executed") is not False:
