@@ -16,11 +16,12 @@ Stream events (JSON, one per line):
 """
 from __future__ import annotations
 
+import base64
 import json
 from typing import AsyncGenerator
 
 from app.core.config import settings
-from app.core.tts import TTSError, synthesize
+from app.core.tts import TTSError, synthesize, to_wav_bytes
 from app.agent.llm_client import chat_completion_stream
 from app.agent.memory import store
 from app.agent.prompts import build_system_prompt
@@ -161,6 +162,10 @@ async def run_agent(
             if settings.tts_enabled:
                 try:
                     audio_b64, mime = await synthesize(final_content)
+                    if "wav" not in mime.lower():
+                        # Gemini trả raw PCM (audio/l16) — bọc header WAV để client phát được
+                        audio_b64 = base64.b64encode(to_wav_bytes(audio_b64)).decode()
+                        mime = "audio/wav"
                     yield {"type": "audio", "format": mime, "data": audio_b64}
                 except TTSError as e:
                     yield {"type": "tts_error", "message": str(e)}

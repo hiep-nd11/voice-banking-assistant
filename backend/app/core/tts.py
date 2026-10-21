@@ -75,7 +75,7 @@ async def _tts_generate_content(client: httpx.AsyncClient, text: str) -> tuple[s
         },
     }
     url = f"{settings.tts_base_url.rstrip('/')}/v1beta/models/{settings.tts_model}:generateContent"
-    resp = await client.post(url, json=payload)
+    resp = await client.post(url, json=payload, headers=_headers())
     if resp.status_code != 200:
         raise TTSError(f"generateContent trả {resp.status_code}: {resp.text[:200]}")
     try:
@@ -97,7 +97,7 @@ async def _tts_interactions(client: httpx.AsyncClient, text: str) -> tuple[str, 
         "generation_config": {"speech_config": [{"voice": settings.tts_voice}]},
     }
     url = f"{settings.tts_base_url.rstrip('/')}/v1beta/interactions"
-    resp = await client.post(url, json=payload)
+    resp = await client.post(url, json=payload, headers=_headers())
     if resp.status_code != 200:
         raise TTSError(f"interactions trả {resp.status_code}: {resp.text[:200]}")
     try:
