@@ -338,7 +338,7 @@
     {
       "intent": "transactions",
       "when": {
-        "pattern": "\\b(giao dich|lich su)\\b"
+        "pattern": "^(?!.*\\b(ngay|hom|tuan|thang|quy|nam nay|nam ngoai|tu|den|thong ke|tong|bao nhieu|bat thuong|nao|khi nao)\\b).*\\b(giao dich|lich su)\\b"
       }
     },
     {

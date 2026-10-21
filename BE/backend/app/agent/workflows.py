@@ -96,6 +96,33 @@ def valid_terms(intent):
     return scenario.terms or range(1, scenario.max_term + 1)
 
 
+COUNT_WORDS = {
+    "mot": 1, "hai": 2, "ba": 3, "bon": 4, "nam": 5, "sau": 6, "bay": 7, "tam": 8, "chin": 9,
+    "muoi": 10, "muoi lam": 15, "hai muoi": 20,
+}
+MAX_RECENT_TRANSACTIONS = 20  # giới hạn của tool MCP get_recent_transactions
+
+
+def transaction_count_from(text):
+    """"3 giao dịch", "mười giao dịch gần nhất" -> 3, 10. Không nói số -> None (MCP mặc định 5)."""
+    match = re.search(
+        r"\b(\d{1,3}|hai muoi|muoi lam|muoi|mot|hai|ba|bon|nam|sau|bay|tam|chin)\s+giao dich\b",
+        normalized(text),
+    )
+    if not match:
+        return None
+    value = match[1]
+    count = int(value) if value.isdigit() else COUNT_WORDS[value]
+    return max(1, min(count, MAX_RECENT_TRANSACTIONS))
+
+
+def lookup_args(lookup, text):
+    if lookup == "get_recent_transactions":
+        count = transaction_count_from(text)
+        return {"limit": count} if count else {}
+    return {}
+
+
 async def tool(name, args=None):
     result = await call_mcp(name, args or {})
     if not isinstance(result, dict) or result.get("error"):
@@ -326,7 +353,7 @@ async def start(session, intent, text, recipient_name=None):
             session.workflow = None
         screen, feature = scenario.screen, scenario.feature
         lookup = scenario.lookup
-        data = await tool(lookup) if lookup else {}
+        data = await tool(lookup, lookup_args(lookup, text)) if lookup else {}
         text = data.get("speech") or workflow_message(scenario.message or "navigation_opened")
         return events(session, text, screen, feature)
     flow = {
