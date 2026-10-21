@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+.venv
+venv
+__pycache__
+**/__pycache__
+*.py[cod]
+.ruff_cache
+.pytest_cache
+tests
+requirements-dev.txt
+pyproject.toml
+*.log
+.DS_Store
+**/.DS_Store
