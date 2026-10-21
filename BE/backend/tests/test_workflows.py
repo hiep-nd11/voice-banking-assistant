@@ -303,6 +303,38 @@ class BankingWorkflowTests(unittest.TestCase):
                 self.assertIn("Em đã mở màn hình", reply)
                 self.assertFalse(self.mcp.await_args_list, "Chỉ mở giao diện, không gọi MCP")
 
+    def test_recent_transactions_use_the_count_the_customer_said(self):
+        for text, limit in (
+            ("3 giao dịch gần nhất", 3),
+            ("cho tôi xem 10 giao dịch gần nhất", 10),
+            ("mười giao dịch gần đây", 10),
+            ("năm giao dịch gần nhất", 5),
+            ("50 giao dịch gần nhất", 20),
+        ):
+            with self.subTest(text=text):
+                self.mcp.reset_mock()
+                self.session = None
+                self.chat(text)
+                self.assertEqual(self.mcp_calls("get_recent_transactions")[-1], {"limit": limit})
+
+    def test_plain_history_request_keeps_mcp_default(self):
+        self.chat("xem lịch sử giao dịch")
+        self.assertEqual(self.mcp_calls("get_recent_transactions")[-1], {})
+
+    def test_date_and_statistics_questions_are_left_to_the_model(self):
+        for text in (
+            "thống kê giao dịch ngày 15/10",
+            "giao dịch hôm qua",
+            "giao dịch tuần trước",
+            "giao dịch tháng 9 tổng bao nhiêu",
+            "có giao dịch nào lạ không",
+            "giao dịch từ ngày 1 đến ngày 10",
+        ):
+            with self.subTest(text=text):
+                self.assertIsNone(intent_for(text))
+        self.assertEqual(intent_for("3 giao dịch gần nhất"), "transactions")
+        self.assertEqual(intent_for("lịch sử giao dịch"), "transactions")
+
     def test_customer_relationship_with_multiple_matches_requires_selection(self):
         self.quick_recipients = []
         self.chat("chuyển tiền cho con 5tr")
