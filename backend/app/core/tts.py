@@ -11,10 +11,10 @@ Module thử lần lượt và cache lại endpoint hoạt động cho các lầ
 
 Chi tiết: https://ai.google.dev/gemini-api/docs/speech-generation
 """
+
 from __future__ import annotations
 
 import base64
-import json
 import re
 
 import httpx
@@ -29,17 +29,17 @@ class TTSError(RuntimeError):
 # --------------------------------------------------------------- chuẩn hóa text cho đọc
 
 _MD_PATTERNS = [
-    (re.compile(r"```.*?```", re.S), " "),   # code block
-    (re.compile(r"`([^`]*)`"), r"\1"),       # inline code
+    (re.compile(r"```.*?```", re.S), " "),  # code block
+    (re.compile(r"`([^`]*)`"), r"\1"),  # inline code
     (re.compile(r"!?\[([^\]]*)\]\([^)]*\)"), r"\1"),  # link -> text
-    (re.compile(r"^\s{0,3}#{1,6}\s*", re.M), ""),     # heading
-    (re.compile(r"(\*\*|__|\*|_)"), ""),     # bold/italic
+    (re.compile(r"^\s{0,3}#{1,6}\s*", re.M), ""),  # heading
+    (re.compile(r"(\*\*|__|\*|_)"), ""),  # bold/italic
     (re.compile(r"^\s*[-*+]\s+", re.M), ""),  # bullet
-    (re.compile(r"^\s*>\s?", re.M), ""),      # blockquote
+    (re.compile(r"^\s*>\s?", re.M), ""),  # blockquote
 ]
 
 _EMOJI_RE = re.compile(
-    "[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0001F900-\U0001F9FF\U00002190-\U000021FF\U00002B00-\U00002BFF]+"
+    "[\U0001f000-\U0001faff\U00002600-\U000027bf\U0001f900-\U0001f9ff\U00002190-\U000021ff\U00002b00-\U00002bff]+"
 )
 
 MAX_TTS_CHARS = 1200  # tránh đọc lại bảng biểu/đoạn quá dài
@@ -58,6 +58,7 @@ def clean_for_speech(text: str) -> str:
 
 # --------------------------------------------------------------- các schema REST
 
+
 def _headers() -> dict:
     return {
         "x-goog-api-key": settings.tts_api_key,
@@ -71,7 +72,9 @@ async def _tts_generate_content(client: httpx.AsyncClient, text: str) -> tuple[s
         "contents": [{"parts": [{"text": text}]}],
         "generationConfig": {
             "responseModalities": ["AUDIO"],
-            "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": settings.tts_voice}}},
+            "speechConfig": {
+                "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": settings.tts_voice}}
+            },
         },
     }
     url = f"{settings.tts_base_url.rstrip('/')}/v1beta/models/{settings.tts_model}:generateContent"
@@ -89,10 +92,12 @@ async def _tts_interactions(client: httpx.AsyncClient, text: str) -> tuple[str, 
     """Schema mới: /v1beta/interactions."""
     payload = {
         "model": settings.tts_model,
-        "input": [{
-            "type": "user_input",
-            "content": [{"type": "text", "text": text}],
-        }],
+        "input": [
+            {
+                "type": "user_input",
+                "content": [{"type": "text", "text": text}],
+            }
+        ],
         "response_format": {"type": "audio"},
         "generation_config": {"speech_config": [{"voice": settings.tts_voice}]},
     }
@@ -139,6 +144,13 @@ async def synthesize(text: str) -> tuple[str, str]:
         for name in order:
             try:
                 b64, mime = await impls[name](client, cleaned)
+                # Browsers cannot play Gemini raw PCM directly in an <audio> tag.
+                if mime.lower().split(";")[0] in {"audio/l16", "audio/pcm"}:
+                    rate = re.search(r"rate=(\d+)", mime, re.I)
+                    b64 = base64.b64encode(
+                        to_wav_bytes(b64, sample_rate=int(rate.group(1)) if rate else 24000)
+                    ).decode("ascii")
+                    mime = "audio/wav"
                 _working_impl = name
                 return b64, mime
             except Exception as e:  # thử schema kế tiếp
@@ -146,14 +158,24 @@ async def synthesize(text: str) -> tuple[str, str]:
     raise TTSError(f"Cả 2 schema TTS đều lỗi (lần cuối: {last_err})")
 
 
-def to_wav_bytes(pcm_b64: str, sample_rate: int = 24000, channels: int = 1, sample_width: int = 2) -> bytes:
+def to_wav_bytes(
+    pcm_b64: str, sample_rate: int = 24000, channels: int = 1, sample_width: int = 2
+) -> bytes:
     """Bọc raw PCM thành WAV có header RIFF (client phát trực tiếp được)."""
     pcm = base64.b64decode(pcm_b64)
     import struct
 
     n = len(pcm)
     header = b"RIFF" + struct.pack("<I", 36 + n) + b"WAVE"
-    header += b"fmt " + struct.pack("<IHHIIHH", 16, 1, channels, sample_rate,
-                                    sample_rate * channels * sample_width, channels * sample_width, sample_width * 8)
+    header += b"fmt " + struct.pack(
+        "<IHHIIHH",
+        16,
+        1,
+        channels,
+        sample_rate,
+        sample_rate * channels * sample_width,
+        channels * sample_width,
+        sample_width * 8,
+    )
     header += b"data" + struct.pack("<I", n)
     return header + pcm

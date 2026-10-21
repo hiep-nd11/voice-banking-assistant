@@ -1,0 +1,407 @@
+{
+  "version": 1,
+  "ttl_seconds": 1800,
+  "banks": {
+    "Vietcombank": [
+      "vietcombank",
+      "viet com bank",
+      "vcb"
+    ],
+    "VietinBank": [
+      "vietinbank",
+      "vietin bank",
+      "viet in bank",
+      "vtb"
+    ],
+    "MB Bank": [
+      "mb bank",
+      "mbbank",
+      "mb"
+    ],
+    "BIDV": [
+      "bidv"
+    ],
+    "ACB": [
+      "acb"
+    ],
+    "Techcombank": [
+      "techcombank",
+      "tech com bank",
+      "tcb"
+    ],
+    "VPBank": [
+      "vpbank",
+      "vp bank",
+      "vpb"
+    ],
+    "Agribank": [
+      "agribank",
+      "agri bank"
+    ],
+    "TPBank": [
+      "tpbank",
+      "tp bank"
+    ],
+    "Sacombank": [
+      "sacombank"
+    ]
+  },
+  "non_action_pattern": "\\b(huong dan|cach|lam sao|nhu the nao|neu)\\b|\\b(khong|dung)\\s+(muon\\s+)?(chuyen|gui|vay)\\b",
+  "scenarios": {
+    "transfer_account": {
+      "kind": "flow",
+      "minimum": 1000,
+      "screen": "transfer",
+      "step_screens": {
+        "awaiting_recipient": "workflow",
+        "prepared": "workflow"
+      },
+      "requirements": [
+        {
+          "slot": "destination.account",
+          "step": "awaiting_account",
+          "message": "ask_account",
+          "screen": "transfer"
+        },
+        {
+          "slot": "destination.bank",
+          "step": "awaiting_bank",
+          "message": "ask_bank",
+          "screen": "transfer"
+        },
+        {
+          "slot": "amount",
+          "step": "awaiting_amount",
+          "message": "ask_amount",
+          "screen": "workflow"
+        }
+      ]
+    },
+    "transfer_qr": {
+      "kind": "flow",
+      "minimum": 1000,
+      "screen": "transfer",
+      "step_screens": {
+        "awaiting_recipient": "workflow",
+        "prepared": "workflow"
+      },
+      "requirements": [
+        {
+          "slot": "qr",
+          "step": "awaiting_qr",
+          "message": "scan_qr",
+          "screen": "qr"
+        },
+        {
+          "slot": "amount",
+          "step": "awaiting_amount",
+          "message": "ask_amount",
+          "screen": "workflow"
+        }
+      ]
+    },
+    "transfer_recipient": {
+      "kind": "flow",
+      "minimum": 1000,
+      "screen": "transfer",
+      "step_screens": {
+        "awaiting_recipient": "workflow",
+        "prepared": "workflow"
+      },
+      "requirements": [
+        {
+          "slot": "amount",
+          "step": "awaiting_amount",
+          "message": "ask_amount",
+          "screen": "workflow"
+        }
+      ]
+    },
+    "open_savings": {
+      "kind": "flow",
+      "minimum": 1000000,
+      "terms": [
+        1,
+        3,
+        6,
+        9,
+        12,
+        24
+      ],
+      "screen": "workflow",
+      "step_screens": {},
+      "requirements": [
+        {
+          "slot": "amount",
+          "step": "awaiting_amount",
+          "message": "ask_amount",
+          "screen": "workflow"
+        },
+        {
+          "slot": "term_months",
+          "step": "awaiting_term",
+          "message": "ask_savings_term",
+          "screen": "workflow"
+        }
+      ]
+    },
+    "open_loan": {
+      "kind": "flow",
+      "minimum": 5000000,
+      "screen": "workflow",
+      "step_screens": {},
+      "requirements": [
+        {
+          "slot": "amount",
+          "step": "awaiting_amount",
+          "message": "ask_amount",
+          "screen": "workflow"
+        }
+      ]
+    },
+    "balance": {
+      "kind": "navigation",
+      "screen": "assets",
+      "lookup": "get_account_balances"
+    },
+    "savings": {
+      "kind": "navigation",
+      "screen": "savings",
+      "lookup": "get_account_balances"
+    },
+    "loans": {
+      "kind": "navigation",
+      "screen": "loans",
+      "lookup": "get_account_balances"
+    },
+    "transactions": {
+      "kind": "navigation",
+      "screen": "history",
+      "lookup": "get_recent_transactions"
+    },
+    "spending": {
+      "kind": "navigation",
+      "screen": "analytics",
+      "lookup": "get_month_overview"
+    },
+    "budget": {
+      "kind": "navigation",
+      "screen": "finance",
+      "lookup": null,
+      "feature": "budget"
+    },
+    "transfer_quick": {
+      "kind": "navigation",
+      "screen": "recipients",
+      "lookup": null,
+      "clear_pending": true
+    }
+  },
+  "rules": [
+    {
+      "intent": "open_savings",
+      "when": {
+        "pattern": "\\b(gui|mo|tao)\\b.*\\btiet kiem\\b"
+      }
+    },
+    {
+      "intent": "open_loan",
+      "when": {
+        "pattern": "\\b(dang k[yi]|muon|can|xin) vay\\b"
+      }
+    },
+    {
+      "intent": "transfer_qr",
+      "when": {
+        "pattern": "\\bquet\\b.*\\bqr\\b"
+      }
+    },
+    {
+      "intent": "transfer_qr",
+      "when": {
+        "all": [
+          {
+            "pattern": "\\b(chuyen|gui|ban)\\b"
+          },
+          {
+            "pattern": "qr"
+          }
+        ]
+      }
+    },
+    {
+      "intent": "transfer_account",
+      "when": {
+        "all": [
+          {
+            "all": [
+              {
+                "pattern": "\\b(chuyen|gui|ban)\\b"
+              },
+              {
+                "pattern": "\\b(tien|cho)\\b"
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "predicate": "has_destination"
+              },
+              {
+                "pattern": "\\b(tai khoan|stk|thuong)\\b"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "intent": "transfer_recipient",
+      "when": {
+        "all": [
+          {
+            "all": [
+              {
+                "pattern": "\\b(chuyen|gui|ban)\\b"
+              },
+              {
+                "pattern": "\\b(tien|cho)\\b"
+              }
+            ]
+          },
+          {
+            "predicate": "has_recipient"
+          }
+        ]
+      }
+    },
+    {
+      "intent": "transfer_quick",
+      "when": {
+        "all": [
+          {
+            "all": [
+              {
+                "pattern": "\\b(chuyen|gui|ban)\\b"
+              },
+              {
+                "pattern": "\\b(tien|cho)\\b"
+              }
+            ]
+          },
+          {
+            "pattern": "nhanh"
+          }
+        ]
+      }
+    },
+    {
+      "intent": "transfer_account",
+      "when": {
+        "all": [
+          {
+            "pattern": "\\b(chuyen|gui|ban)\\b"
+          },
+          {
+            "pattern": "\\b(tien|cho)\\b"
+          }
+        ]
+      }
+    },
+    {
+      "intent": "transfer_quick",
+      "when": {
+        "pattern": "\\bchuyen nhanh\\b"
+      }
+    },
+    {
+      "intent": "budget",
+      "when": {
+        "pattern": "\\b(ke hoach|ngan sach|50.?30.?20)\\b"
+      }
+    },
+    {
+      "intent": "transactions",
+      "when": {
+        "pattern": "\\b(giao dich|lich su)\\b"
+      }
+    },
+    {
+      "intent": "spending",
+      "when": {
+        "pattern": "\\b(chi tieu|thu chi)\\b"
+      }
+    },
+    {
+      "intent": "balance",
+      "when": {
+        "pattern": "\\b(so du|bao nhieu tien|con bao nhieu)\\b"
+      }
+    },
+    {
+      "intent": "savings",
+      "when": {
+        "pattern": "\\b(tiet kiem|dao han)\\b"
+      }
+    },
+    {
+      "intent": "loans",
+      "when": {
+        "pattern": "\\b(khoan vay|du no|ky tra|tra no)\\b"
+      }
+    }
+  ],
+  "messages": {
+    "banking_unavailable": "Không truy vấn được dữ liệu ngân hàng. Vui lòng thử lại.",
+    "invalid_amount": "Số tiền phải từ 1.000đ và nằm trong giới hạn cho phép.",
+    "quick_transfer_label": "Chuyển tiền nhanh",
+    "scan_qr": "Anh hãy bấm Mở camera hoặc tải ảnh QR. Em sẽ điền thông tin rồi hỏi phần còn thiếu.",
+    "unknown_recipient_label": "người này",
+    "recipient_not_found": "Không có ai tên {name} trong danh bạ chuyển tiền nhanh. Em đã mở màn hình chuyển tiền thường; anh nhập thông tin người nhận nhé.",
+    "choose_duplicate_recipient": "Có nhiều người trùng tên trong Chuyển tiền nhanh. Anh chọn đúng người nhận trên màn hình giúp em.",
+    "ask_account": "Anh muốn chuyển đến số tài khoản nào?",
+    "ask_bank": "Số tài khoản này thuộc ngân hàng nào?",
+    "ask_amount": "Anh muốn dùng số tiền bao nhiêu? Anh có thể nói hoặc nhập trên màn hình.",
+    "minimum_amount": "Số tiền tối thiểu cho yêu cầu này là {minimum:,}đ. Anh nhập lại giúp em.",
+    "ask_savings_term": "Anh muốn gửi kỳ hạn mấy tháng? Các kỳ hạn gồm 1, 3, 6, 9, 12 hoặc 24 tháng.",
+    "unsupported_term": "Kỳ hạn chưa được hỗ trợ. Anh chọn lại kỳ hạn trên màn hình giúp em.",
+    "insufficient_balance": "Số dư không đủ cho số tiền này. Anh hãy đổi số tiền.",
+    "qr_amount_conflict": "Số tiền trong QR khác với số tiền anh đã nói. Anh kiểm tra lại số tiền và bấm Lưu thông tin để tiếp tục.",
+    "term_detail": ", kỳ hạn {term_months} tháng",
+    "review_summary": "Em đã điền số tiền {amount_text} đồng{detail}. Anh kiểm tra thông tin trên màn hình. Đây là bước chuẩn bị, chưa thực hiện giao dịch.",
+    "unsupported_scenario": "Kịch bản chưa được hỗ trợ.",
+    "navigation_opened": "Em đã mở mục tương ứng để anh xem dữ liệu ngân hàng.",
+    "note_too_long": "Nội dung chuyển khoản tối đa 140 ký tự.",
+    "expired": "Yêu cầu trước đã hết hạn. Anh nói lại yêu cầu để bắt đầu nhé.",
+    "cancelled": "Đã hủy yêu cầu. Chưa có giao dịch nào được thực hiện.",
+    "confirm_on_screen": "Anh hãy kiểm tra thông tin và bấm nút chuẩn bị trên màn hình. Em không thực hiện chuyển tiền qua lời xác nhận trong chat.",
+    "editing": "Anh có thể chỉnh thông tin rồi bấm Kiểm tra lại.",
+    "resume_qr": "Anh có thể mở màn quét QR để tiếp tục, hoặc nói hủy.",
+    "event_cancelled": "Đã hủy yêu cầu. Chưa có giao dịch nào được thực hiện.",
+    "resumed": "Anh có thể tiếp tục yêu cầu đang chuẩn bị.",
+    "not_qr_flow": "Luồng hiện tại không quét QR.",
+    "not_recipient_flow": "Luồng này không chọn người nhận từ danh bạ.",
+    "invalid_recipient_query": "Anh nhập tên người nhận cần tìm.",
+    "cannot_select_recipient": "Luồng này không chọn người nhận từ danh bạ.",
+    "invalid_recipient_choice": "Người nhận không thuộc danh sách đang chọn.",
+    "invalid_qr": "Luồng hiện tại không quét QR.",
+    "invalid_qr_information": "Thông tin QR không hợp lệ.",
+    "invalid_qr_amount": "Số tiền trong QR không hợp lệ.",
+    "invalid_fields": "Có trường thông tin không được phép thay đổi.",
+    "invalid_form_amount": "Số tiền không hợp lệ.",
+    "invalid_term": "Kỳ hạn không hợp lệ.",
+    "invalid_note": "Nội dung tối đa 140 ký tự.",
+    "invalid_recipient": "Tên người nhận không hợp lệ.",
+    "recipient_account_locked": "Người nhận đã lưu không được sửa tài khoản tùy ý.",
+    "invalid_bank": "Anh chọn ngân hàng thụ hưởng hợp lệ.",
+    "invalid_account": "Số tài khoản phải gồm 6–20 chữ số.",
+    "review_required": "Anh cần hoàn tất và kiểm tra thông tin trước.",
+    "risk_updated": "Kết quả kiểm tra đã cập nhật. Anh đọc cảnh báo và kiểm tra số dư trước khi tiếp tục.",
+    "recipient_name_required": "Anh cần nhập và kiểm tra tên người nhận. Tên này chưa được ngân hàng xác minh.",
+    "account_prepared": "Thông tin chuyển khoản đã sẵn sàng để kiểm tra. Backend chưa có API thực thi chuyển khoản theo số tài khoản; chưa có tiền nào được chuyển.",
+    "invalid_preparation_result": "Nguồn dữ liệu không xác nhận được yêu cầu chuẩn bị.",
+    "request_prepared": "Đã tạo yêu cầu chuẩn bị. Anh xem thông tin trên màn hình; chưa có giao dịch nào được thực hiện.",
+    "unsupported_event": "Sự kiện không được hỗ trợ."
+  }
+}

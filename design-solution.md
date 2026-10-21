@@ -1,5 +1,7 @@
 # Thiết kế Backend — VietinBot Voice Agent
 
+> Tài liệu thiết kế ban đầu, giữ lại để tham khảo. Cấu trúc và lệnh chạy hiện tại nằm trong [README](README.md); hợp đồng đang triển khai nằm trong [workflow-client.md](docs/workflow-client.md). Một số phương án bên dưới chưa được tích hợp.
+
 ## 1. Tổng quan
 
 Backend là một **Voice Agent** tài chính cá nhân của VietinBank: nhận **audio** từ người dùng (giọng nói tiếng Việt), hiểu ý định, thực hiện yêu cầu bằng cách gọi các banking tool, và trả về **câu trả lời dạng text + audio (TTS)** kèm trace các bước thực thi.

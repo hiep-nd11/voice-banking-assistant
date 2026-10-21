@@ -1,20 +1,27 @@
 """Cấu hình tập trung — đọc từ biến môi trường / file .env."""
+
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BE_ROOT = Path(__file__).resolve().parents[3]
 
 
 class Settings(BaseSettings):
-    # Tìm .env ở thư mục chạy lệnh (backend/) và ở root project; biến môi trường thật ưu tiên hơn cả.
+    # Đường dẫn cố định theo source; biến môi trường thật ưu tiên hơn các file.
     model_config = SettingsConfigDict(
-        env_file=(".env", "../.env"), env_file_encoding="utf-8", extra="ignore"
+        env_file=(BE_ROOT / ".env", BE_ROOT / "backend" / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
     # LLM (OpenAI-compatible). Đặt LLM_API_KEY / LLM_BASE_URL trong .env hoặc biến môi trường.
-    # Rỗng API key -> chế độ demo fallback (rule-based).
+    # Nhánh LLM cần API key; các workflow xác định vẫn xử lý trước nhánh LLM.
     llm_api_key: str = ""
     llm_base_url: str = ""
     llm_model: str = "glm-4.6"
 
-    allow_origins: str = "http://localhost:3000"
+    allow_origins: str = "http://localhost:3000,http://localhost:5173,http://localhost:8080"
 
     # MCP server (voice-banking-assistant) — nguồn dữ liệu khách hàng thật (mock).
     # Đặt MCP_BASE_URL / MCP_API_KEY trong .env.

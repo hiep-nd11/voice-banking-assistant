@@ -8,3 +8,5 @@ sse-starlette==2.2.1
 python-multipart==0.0.20
 numpy==2.2.1
 scipy==1.15.0
+langchain-core==1.6.12
+PyYAML==6.0.3

@@ -1,6 +1,6 @@
 # ASR Voice WebSocket API
 
-> Bản copy tài liệu (nguồn: artifact claude.ai, 2026-10-20). Đã tích hợp vào backend — xem `backend/app/core/stt.py` và `backend/app/api/voice.py`.
+> Tài liệu tham khảo WebSocket từ artifact ngày 20/10/2026. Ứng dụng hiện dùng upload WAV qua `/api/voice`, BE gọi `${ASR_BASE_URL}/transcribe`. WebSocket/wake word dưới đây chưa được tích hợp vào FE; endpoint tham khảo không thay thế cấu hình ASR hiện tại.
 
 Client stream audio micro (PCM16 mono 16 kHz) qua một WebSocket; server tự phát hiện wake word, cắt câu bằng VAD và trả về văn bản tiếng Việt dưới dạng JSON.
 
@@ -109,7 +109,7 @@ Cùng host với WebSocket.
 `/transcribe` chạy STT thẳng trên cả file, không qua wake word/VAD:
 
 ```bash
-curl -X POST --data-binary @cau_lenh.wav https://endpoint-9feaeccd-aa3a-4bf1-9553-e8891bb30e24.agentbase-runtime.aiplatform.vngcloud.vn/transcribe
+curl -X POST --data-binary @cau_lenh.wav https://endpoint-5c01bb45-f992-4e76-86a8-30b2de404506.agentbase-runtime.aiplatform.vngcloud.vn/transcribe
 ```
 
 ## Code mẫu

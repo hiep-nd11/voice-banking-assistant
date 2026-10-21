@@ -1,12 +1,15 @@
 """FastAPI entry point — Agent runtime (chưa gắn DB/scheduler)."""
+
 from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
+from app.api.banking import router as banking_router
 from app.api.chat import router as chat_router
 from app.api.voice import router as voice_router
+from app.api.workflows import router as workflow_router
+from app.core.config import settings
 
 app = FastAPI(title="VTB FinBot — Agent Runtime", version="0.2.0")
 
@@ -19,6 +22,8 @@ app.add_middleware(
 
 app.include_router(chat_router)
 app.include_router(voice_router)
+app.include_router(banking_router)
+app.include_router(workflow_router)
 
 
 @app.get("/health")

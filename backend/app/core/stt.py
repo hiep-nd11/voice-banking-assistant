@@ -9,6 +9,7 @@ docs/voice-streaming-client.md.
 
 Chi tiết API: docs/asr-voice-websocket-api.md
 """
+
 from __future__ import annotations
 
 import io
@@ -40,7 +41,11 @@ def to_wav16k(audio: bytes) -> bytes:
         with wave.open(io.BytesIO(audio)) as w:
             ch, sw, sr = w.getnchannels(), w.getsampwidth(), w.getframerate()
             assert sw == 2, "chỉ hỗ trợ WAV 16-bit"
-            a = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").reshape(-1, ch).mean(axis=1)
+            a = (
+                np.frombuffer(w.readframes(w.getnframes()), dtype="<i2")
+                .reshape(-1, ch)
+                .mean(axis=1)
+            )
     except (wave.Error, AssertionError) as e:
         raise STTError(f"Định dạng WAV không hợp lệ: {e}") from e
 
@@ -62,13 +67,23 @@ async def transcribe_file(audio: bytes) -> str:
 
     Trả về text tiếng Việt (thường CHỮ HOA, không dấu câu).
     """
+    if not settings.asr_base_url:
+        raise STTError("Backend chưa cấu hình ASR_BASE_URL")
     payload = to_wav16k(audio)
-    url = f"{settings.asr_base_url}/transcribe"
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        resp = await client.post(url, content=payload)
+    url = f"{settings.asr_base_url.rstrip('/')}/transcribe"
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(url, content=payload)
+    except httpx.HTTPError as e:
+        raise STTError("Không kết nối được dịch vụ nhận dạng giọng nói") from e
     if resp.status_code != 200:
         raise STTError(f"ASR /transcribe trả {resp.status_code}: {resp.text[:200]}")
-    data = resp.json()
+    try:
+        data = resp.json()
+    except ValueError as e:
+        raise STTError("ASR trả phản hồi JSON không hợp lệ") from e
+    if not isinstance(data, dict) or not isinstance(data.get("text"), str):
+        raise STTError("ASR trả phản hồi thiếu text")
     text = (data.get("text") or "").strip()
     if not text:
         raise STTError("ASR trả text rỗng (không nhận được lời nói)")

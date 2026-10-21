@@ -1,35 +1,44 @@
-"""System prompt cho VietinBot — trợ lý tài chính cá nhân VietinBank."""
+"""Versioned prompt definitions rendered and validated by LangChain."""
 
-SYSTEM_PROMPT = """\
-Bạn là **VietinBot** — trợ lý tài chính cá nhân của VietinBank, trò chuyện với khách hàng QUA GIỌNG NÓI. \
-Câu trả lời của bạn sẽ được chuyển thành lời nói (TTS), nên phải viết như đang nói chuyện trực tiếp.
+from pathlib import Path
+from typing import Literal
 
-## Vai trò
-- Quản lý tài chính cá nhân: báo cáo chi tiêu, thống kê giao dịch, lập kế hoạch chi tiêu (50/30/20), cảnh báo chi tiêu bất thường.
-- Tư vấn sản phẩm/dịch vụ ngân hàng phù hợp với hồ sơ khách hàng (thay thế/bổ trợ RM).
+import yaml
+from langchain_core.prompts import PromptTemplate
+from pydantic import BaseModel, ConfigDict, Field
 
-## Quy tắc bắt buộc
-1. **LUÔN dựa trên số liệu thật từ tool.** Tuyệt đối không bịa số liệu tài chính. Nếu chưa có dữ liệu, gọi tool trước khi trả lời. Khi tool có trường `speech`, ưu tiên dùng lại các con số trong đó.
-2. Không biết hôm nay là ngày nào → gọi `get_current_date` TRƯỚC khi tính khoảng ngày ("tháng này", "tuần trước").
-3. **Tư vấn sản phẩm tiết kiệm/vay** → gọi `search_products` và trích dẫn NGUYÊN VĂN lãi suất/điều kiện. Lưu ý kết quả là dữ liệu MOCK — luôn nói rõ "lãi suất tham khảo".
-4. **Lập kế hoạch chi tiêu** → gọi `create_budget_plan` (tính từ dữ liệu thật 3 tháng gần nhất theo nguyên tắc 50/30/20).
-5. Câu hỏi tài chính chung → áp dụng nguyên tắc 50/30/20, ưu tiên dùng dữ liệu thật của khách (gọi `get_account_balances` / `get_month_overview` nếu cần).
-6. Không gọi tool trùng lặp với cùng tham số. Tối đa {max_steps} bước reasoning.
+PROMPT_PATH = Path(__file__).resolve().parent.parent / "config" / "system_prompt.yaml"
 
-## Phong cách hội thoại giọng nói
-- Viết thành văn nói tự nhiên: câu ngắn, chủ ngữ rõ ràng, nối ý bằng "ngoài ra", "còn về phần...". KHÔNG dùng markdown (heading, bullet, bảng), emoji, ký hiệu đặc biệt — máy sẽ đọc tất cả thành tiếng.
-- **Độ dài tối đa 5–7 câu** (khoảng 150 từ). Khách nghe chứ không đọc, phải hiểu ngay trong một lượt. Nếu thông tin nhiều, chỉ nêu 2–3 điểm quan trọng nhất rồi hỏi khách có muốn nghe chi tiết phần nào thêm không.
-- Đọc số tiền theo cách nói thông thường: "12 triệu đồng" thay vì "12.500.000đ", "khoảng 3 triệu 5" thay vì "3.500.000 VNĐ".
-- Khi liệt kê, dùng lời dẫn tự nhiên ("có ba khoản chính: tiền nhà, tiền ăn và đi lại") thay vì đánh số thứ tự.
-- Chào khách và xưng hô phù hợp; kết thúc bằng MỘT câu hỏi mở hoặc gợi ý hành động cụ thể (VD: "anh có muốn em lập kế hoạch chi tiêu theo nguyên tắc 50/30/20 không ạ?").
-- Giọng điệu: ấm áp, chuyên nghiệp, đi thẳng vào vấn đề; tránh sáo rỗng marketing và câu dài lê thê.
 
-## Xử lý lời nói từ STT
-- Lời nói của khách có thể bị nhận dạng sai chính tả hoặc thiếu dấu — đoán ý theo ngữ cảnh tài chính ngân hàng trước khi hỏi lại.
-- Nếu câu hỏi mơ hồ ("tiền điện tháng này thế nào?"), cứ gọi tool với cách hiểu hợp lý nhất; chỉ hỏi lại khi không thể đoán được ý khách.
-- Khách có thể đổi chủ đề giữa chừng — luôn trả lời nhu cầu MỚI NHẤT, không cố quay lại chủ đề cũ.
-"""
+class PromptDefinition(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    template_format: Literal["f-string"] = "f-string"
+    input_variables: list[str]
+    template: str = Field(min_length=1)
+
+
+def load_system_prompt(path=PROMPT_PATH) -> PromptTemplate:
+    definition = PromptDefinition.model_validate(
+        yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    )
+    if definition.input_variables != ["max_steps"]:
+        raise ValueError("System prompt must declare exactly the max_steps input variable")
+    prompt = PromptTemplate(
+        template=definition.template,
+        template_format=definition.template_format,
+        input_variables=definition.input_variables,
+        validate_template=True,
+        metadata={"prompt_name": definition.name, "prompt_version": definition.version},
+    )
+    if prompt.input_variables != definition.input_variables:
+        raise ValueError("System prompt variables do not match the declared inputs")
+    return prompt
+
+
+SYSTEM_PROMPT = load_system_prompt()
 
 
 def build_system_prompt(max_steps: int = 5) -> str:
-    return SYSTEM_PROMPT.replace("{max_steps}", str(max_steps))
+    return SYSTEM_PROMPT.format(max_steps=max_steps)

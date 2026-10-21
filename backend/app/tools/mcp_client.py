@@ -3,6 +3,7 @@
 Điều phối tool cho orchestrator: local tool tính tại chỗ, còn lại forward qua MCP.
 Server MCP chạy stateless (JSON-RPC qua HTTP POST), gắn cố định 1 khách hàng qua VB_CUSTOMER_ID.
 """
+
 from __future__ import annotations
 
 import json
@@ -19,8 +20,13 @@ LOCAL_TOOLS = {"create_budget_plan"}
 async def call_mcp(name: str, args: dict | None = None) -> dict:
     """Gọi 1 tool trên MCP server, trả dict kết quả (đã parse JSON từ text content)."""
     payload = {
-        "jsonrpc": "2.0", "id": 1, "method": "tools/call",
-        "params": {"name": name, "arguments": {k: v for k, v in (args or {}).items() if v is not None}},
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": name,
+            "arguments": {k: v for k, v in (args or {}).items() if v is not None},
+        },
     }
     headers = {
         "Content-Type": "application/json",
@@ -68,16 +74,26 @@ async def _create_budget_plan(args: dict) -> dict:
     m0 = month_start(today)
     win_from = prev_month(prev_month(m0))
 
-    income_r = await call_mcp("get_income_summary", {"date_from": win_from.isoformat(), "date_to": today.isoformat()})
-    groups_r = await call_mcp("get_spending_summary", {
-        "date_from": win_from.isoformat(), "date_to": today.isoformat(), "group_by": "group", "top": 10,
-    })
+    income_r = await call_mcp(
+        "get_income_summary", {"date_from": win_from.isoformat(), "date_to": today.isoformat()}
+    )
+    groups_r = await call_mcp(
+        "get_spending_summary",
+        {
+            "date_from": win_from.isoformat(),
+            "date_to": today.isoformat(),
+            "group_by": "group",
+            "top": 10,
+        },
+    )
     if "error" in income_r or "error" in groups_r:
         return {"error": income_r.get("error") or groups_r.get("error")}
 
     income = args.get("monthly_income") or (income_r.get("total_income") or 0) // 3
     if not income:
-        return {"error": "Không có dữ liệu thu nhập để lập kế hoạch. Hỏi khách thu nhập hàng tháng."}
+        return {
+            "error": "Không có dữ liệu thu nhập để lập kế hoạch. Hỏi khách thu nhập hàng tháng."
+        }
 
     cur_needs = cur_wants = 0
     for it in groups_r.get("items", []):
@@ -88,21 +104,36 @@ async def _create_budget_plan(args: dict) -> dict:
     cur_needs, cur_wants = cur_needs // 3, cur_wants // 3  # trung bình/tháng
 
     plan = {
-        "needs": {"target": int(income * 0.5), "current_avg": cur_needs,
-                  "includes": "Ăn uống, đi lại, hóa đơn, sức khỏe, giáo dục (chi thiết yếu)"},
-        "wants": {"target": int(income * 0.3), "current_avg": cur_wants,
-                  "includes": "Mua sắm, giải trí, chi tiêu cá nhân"},
-        "savings": {"target": int(income * 0.2), "current_avg": max(0, income - cur_needs - cur_wants),
-                    "includes": "Tiết kiệm/đầu tư hàng tháng"},
+        "needs": {
+            "target": int(income * 0.5),
+            "current_avg": cur_needs,
+            "includes": "Ăn uống, đi lại, hóa đơn, sức khỏe, giáo dục (chi thiết yếu)",
+        },
+        "wants": {
+            "target": int(income * 0.3),
+            "current_avg": cur_wants,
+            "includes": "Mua sắm, giải trí, chi tiêu cá nhân",
+        },
+        "savings": {
+            "target": int(income * 0.2),
+            "current_avg": max(0, income - cur_needs - cur_wants),
+            "includes": "Tiết kiệm/đầu tư hàng tháng",
+        },
     }
     adjustments = []
     if cur_needs > plan["needs"]["target"]:
-        adjustments.append(f"Nhóm chi thiết yếu đang {cur_needs:,}đ/tháng, vượt khung 50% ({plan['needs']['target']:,}đ).")
+        adjustments.append(
+            f"Nhóm chi thiết yếu đang {cur_needs:,}đ/tháng, vượt khung 50% ({plan['needs']['target']:,}đ)."
+        )
     if cur_wants > plan["wants"]["target"]:
-        adjustments.append(f"Nhóm muốn mua đang {cur_wants:,}đ/tháng, vượt khung 30% ({plan['wants']['target']:,}đ) — "
-                           f"giảm khoảng {cur_wants - plan['wants']['target']:,}đ/tháng.")
+        adjustments.append(
+            f"Nhóm muốn mua đang {cur_wants:,}đ/tháng, vượt khung 30% ({plan['wants']['target']:,}đ) — "
+            f"giảm khoảng {cur_wants - plan['wants']['target']:,}đ/tháng."
+        )
     if not adjustments:
-        adjustments.append("Chi tiêu hiện tại nằm trong khung 50/30/20. Duy trì và tối ưu phần tích lũy 20%.")
+        adjustments.append(
+            "Chi tiêu hiện tại nằm trong khung 50/30/20. Duy trì và tối ưu phần tích lũy 20%."
+        )
 
     return {
         "monthly_income": income,

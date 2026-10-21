@@ -1,20 +1,12 @@
 services:
   backend:
     build: ./backend
-    container_name: vtb-finbot-api
-    environment:
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_BASE_URL: ${LLM_BASE_URL:-}
-      LLM_MODEL: ${LLM_MODEL:-glm-4.6}
-      TTS_API_KEY: ${TTS_API_KEY:-}
-      TTS_BASE_URL: ${TTS_BASE_URL:-}
-      TTS_MODEL: ${TTS_MODEL:-gemini-3.1-flash-tts-preview}
-      TTS_VOICE: ${TTS_VOICE:-Aoede}
-      MCP_BASE_URL: ${MCP_BASE_URL:-}
-      MCP_API_KEY: ${MCP_API_KEY:-}
-      ASR_BASE_URL: ${ASR_BASE_URL:-}
-      ALLOW_ORIGINS: http://localhost:3000
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+    env_file:
+      - path: ./.env
+        required: false
+    volumes:
+      - ./backend/app/config:/app/app/config:ro
     ports:
       - "8000:8000"
-    command: >
-      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1"
+    restart: unless-stopped

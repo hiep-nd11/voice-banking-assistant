@@ -1,5 +1,7 @@
 # Tích hợp voice streaming (browser → ASR → backend)
 
+> Hiện trạng: FE dùng cách 1, tự mã hóa WAV PCM16 mono, bấm Bắt đầu nói rồi Dừng nói để gửi. Cách 2 là phương án tham khảo, chưa tích hợp WebSocket/wake word trong ứng dụng. Chat và voice đều gửi `quick_recipients` theo [hợp đồng workflow](workflow-client.md).
+
 Hai cách dùng ASR Voice API với backend — tùy độ realtime cần cho demo:
 
 ## Cách 1: File mode qua backend (đã tích hợp) — đơn giản, có record button
